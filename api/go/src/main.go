@@ -47,11 +47,11 @@ func main() {
 	//Ruta principal
 	router.HandleFunc("/", indexRoute)
 	//Ruta para conectarse a la base de datos y esperar los datos
-	router.HandleFunc("/iniciarCarga", iniciarCarga)
+	router.HandleFunc("/endpoint/go/iniciarCarga", iniciarCarga)
 	//Ruta para publicar la informacion de la base de datos
-	router.HandleFunc("/publicar", publicar)
+	router.HandleFunc("/endpoint/go/publicar", publicar)
 	//Ruta para cerrar la conexion de la base de datos y mandar una notificacion
-	router.HandleFunc("/finalizarCarga", publicar)
+	router.HandleFunc("/endpoint/go/finalizarCarga", publicar)
 	//Escuchamos al puerto
 	log.Fatal(http.ListenAndServe(":3000", router))
 }
