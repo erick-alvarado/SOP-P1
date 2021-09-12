@@ -1,22 +1,22 @@
 #[macro_use] extern crate rocket;
 
 
-#[get("/")]
+#[get("/endpoint/rust")]
 fn index() -> &'static str {
    "API Rust"
 }
 
-#[get("/iniciarCarga")]
+#[get("/endpoint/rust/iniciarCarga")]
 fn iniciar_carga() -> &'static str {
    "carga iniciada"
 }
 
-#[get("/publicar")]
+#[get("/endpoint/rust/publicar")]
 fn publicar() -> &'static str {
    "publicando"
 }
 
-#[get("/finalizarCarga")]
+#[get("/endpoint/rust/finalizarCarga")]
 fn finalizar_carga() -> &'static str {
    "carga finalizada"
 }
