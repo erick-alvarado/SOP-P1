@@ -11,11 +11,11 @@ def getThing():
 # Create Data Routes
 @app.route('/', methods=['POST'])
 def addThing():
-    new_product = {
-        'name': request.json['name'],
-        'price': request.json['price'],
-        'quantity': 10
-    }
+    #new_product = {
+    #    'name': request.json['name'],
+    #    'price': request.json['price'],
+    #    'quantity': 10
+    #}
     return jsonify({'message': 'Thing created'})
 
 
@@ -32,5 +32,5 @@ def deleteThing(product_name):
     
 
 if __name__ == '__main__':
-    
+
     app.run(debug=True, port=4000)
