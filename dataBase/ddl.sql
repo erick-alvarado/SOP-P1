@@ -5,6 +5,7 @@ use olympics_game_news;
 create table Publicacion(
 	id_publicacion int auto_increment,
     nombre varchar(50),
+    comentario varchar(250),
     fecha date,
     upvotes int,
     downvotes int,

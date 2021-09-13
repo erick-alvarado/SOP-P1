@@ -4,7 +4,7 @@ exports.getAll = async (req, res) => {
   let publicaciones = [];
   try {
     publicaciones = await Publicacion.find();
-    console.log(publicaciones);
+    //console.log(publicaciones);
   } catch (error) {
     console.log(error);
   }

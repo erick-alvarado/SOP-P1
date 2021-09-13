@@ -4,7 +4,9 @@ const cors = require("cors");
 const morgan = require("morgan");
 const app = express();
 require("./database/mongoDB").conectar();
-const mongoPublicacion = require("./routes/mongo/MongoPublicacion");
+require("./database/mysql");
+const mongo = require("./routes/mongo/publicacion");
+const mysql = require("./routes/mysql/publicacion");
 
 //settings
 app.set("port", process.env.PORT);
@@ -19,7 +21,8 @@ app.get("/", (req, res) => {
   res.send("Hello World");
 });
 
-app.use("/mongo", mongoPublicacion);
+app.use("/mongo", mongo);
+app.use("/mysql", mysql);
 
 //escuchando el servidor
 app.listen(app.get("port"), () => {

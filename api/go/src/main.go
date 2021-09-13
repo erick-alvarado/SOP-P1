@@ -16,10 +16,13 @@ import (
 )
 
 type notify struct {
-	State bool      `json:state`
-	Time  time.Time `json:time`
-	Error bool      `json:error`
+	Name  string    `json:"name"`
+	State bool      `json:"state"`
+	Time  time.Time `json:"time"`
+	Error bool      `json:"error"`
 }
+
+type allNotifies []notify
 
 type task struct {
 	Id      int    `json:"id"`
@@ -37,8 +40,9 @@ var tasks = allTasks{
 	},
 }
 
-func iniciarCargaMysql(w http.ResponseWriter, r *http.Request) {
+func iniciarCargaMysql() notify {
 	var notificacion = notify{
+		Name:  "Mysql",
 		State: true,
 		Time:  time.Now(),
 		Error: false,
@@ -49,8 +53,8 @@ func iniciarCargaMysql(w http.ResponseWriter, r *http.Request) {
 		fmt.Println()
 		notificacion.State = false
 		notificacion.Error = true
-		json.NewEncoder(w).Encode(notificacion)
-		return
+
+		return notificacion
 	}
 	// Terminar conexión al terminar función
 	defer db.Close()
@@ -62,16 +66,16 @@ func iniciarCargaMysql(w http.ResponseWriter, r *http.Request) {
 		fmt.Println()
 		notificacion.State = false
 		notificacion.Error = true
-		json.NewEncoder(w).Encode(notificacion)
-		return
+		return notificacion
 	}
 	// Listo, aquí ya podemos usar a db!
 	fmt.Println("Mysql is connected to: " + os.Getenv("MYSQL_NAME"))
-	json.NewEncoder(w).Encode(notificacion)
+	return notificacion
 }
 
-func iniciarCargaMongodb(w http.ResponseWriter, r *http.Request) {
+func iniciarCargaMongodb() notify {
 	var notificacion = notify{
+		Name:  "Mongo",
 		State: true,
 		Time:  time.Now(),
 		Error: false,
@@ -83,8 +87,7 @@ func iniciarCargaMongodb(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 		notificacion.State = false
 		notificacion.Error = true
-		json.NewEncoder(w).Encode(notificacion)
-		return
+		return notificacion
 	}
 	defer db.Disconnect(ctx)
 	err = db.Ping(ctx, readpref.Primary())
@@ -92,19 +95,28 @@ func iniciarCargaMongodb(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 		notificacion.State = false
 		notificacion.Error = true
-		json.NewEncoder(w).Encode(notificacion)
-		return
+		return notificacion
 	}
 	fmt.Println("MongoDB is connected to: " + os.Getenv("MONGO_NAME"))
-	json.NewEncoder(w).Encode(notificacion)
+
+	return notificacion
+}
+
+func iniciarCarga(w http.ResponseWriter, r *http.Request) {
+	var notifies = allNotifies{
+		iniciarCargaMysql(),
+		iniciarCargaMongodb(),
+	}
+	json.NewEncoder(w).Encode(notifies)
 }
 
 func publicar(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(tasks)
 }
 
-func finalizarCargaMysql(w http.ResponseWriter, r *http.Request) {
+func finalizarCargaMysql() notify {
 	var notificacion = notify{
+		Name:  "Mysql",
 		State: false,
 		Time:  time.Now(),
 		Error: false,
@@ -114,17 +126,18 @@ func finalizarCargaMysql(w http.ResponseWriter, r *http.Request) {
 		fmt.Printf("Error obteniendo base de datos: %v", err)
 		fmt.Println()
 		notificacion.Error = true
-		json.NewEncoder(w).Encode(notificacion)
-		return
+
+		return notificacion
 	}
 	// Terminar conexión al terminar función
 	defer db.Close()
 	fmt.Println("Mysql is disconnected to: " + os.Getenv("MYSQL_NAME"))
-	json.NewEncoder(w).Encode(notificacion)
+	return notificacion
 }
 
-func finalizarCargaMongodb(w http.ResponseWriter, r *http.Request) {
+func finalizarCargaMongodb() notify {
 	var notificacion = notify{
+		Name:  "Mongo",
 		State: false,
 		Time:  time.Now(),
 		Error: false,
@@ -135,13 +148,20 @@ func finalizarCargaMongodb(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatal(err)
 		notificacion.Error = true
-		json.NewEncoder(w).Encode(notificacion)
-		return
+		return notificacion
 	}
 	// Terminar conexión al terminar función
 	defer db.Disconnect(ctx)
 	fmt.Println("MongoDB is disconnected to: " + os.Getenv("MONGO_NAME"))
-	json.NewEncoder(w).Encode(notificacion)
+	return notificacion
+}
+
+func finalizarCarga(w http.ResponseWriter, r *http.Request) {
+	var notifies = allNotifies{
+		finalizarCargaMysql(),
+		finalizarCargaMongodb(),
+	}
+	json.NewEncoder(w).Encode(notifies)
 }
 
 func indexRoute(w http.ResponseWriter, r *http.Request) {
@@ -157,13 +177,11 @@ func main() {
 	//Ruta principal
 	router.HandleFunc("/", indexRoute)
 	//Ruta para conectarse a la base de datos y esperar los datos
-	router.HandleFunc("/endpoint/go/iniciarCarga/mysql", iniciarCargaMysql)
-	router.HandleFunc("/endpoint/go/iniciarCarga/mongodb", iniciarCargaMongodb)
+	router.HandleFunc("/endpoint/go/iniciarCarga", iniciarCarga)
 	//Ruta para publicar la informacion de la base de datos
 	router.HandleFunc("/endpoint/go/publicar", publicar)
 	//Ruta para cerrar la conexion de la base de datos y mandar una notificacion
-	router.HandleFunc("/endpoint/go/finalizarCarga/mysql", finalizarCargaMysql)
-	router.HandleFunc("/endpoint/go/finalizarCarga/mongodb", finalizarCargaMongodb)
+	router.HandleFunc("/endpoint/go/finalizarCarga", finalizarCarga)
 	//Escuchamos al puerto
 	fmt.Println("Server on port:" + port)
 	log.Fatal(http.ListenAndServe(":"+port, router))
