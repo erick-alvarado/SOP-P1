@@ -1,34 +1,41 @@
+from os import system
+import mysql.connector
 from flask import Flask, jsonify, request
 
 app = Flask(__name__)
 
-# Get Data Routes
-@app.route('/', methods=['GET'])
-def getThing():
+# Connection Database
+mydb = mysql.connector.connect(
+  host="35.231.149.154",
+  user="root",
+  password="g%dEh7uWVS9j0p*",
+  database="olympics_game_news"
+)
+mycursor = mydb.cursor()
+
+# Start load
+@app.route('/python/iniciarCarga')
+def iniciarCarga():
+    mycursor = mydb.cursor()
+    return jsonify({'response': 'Python db connected!'})
+
+# Publish 
+@app.route('/python/publicar', methods=['POST'])
+def publicar():
+    print(request.json)
+
+    #sql = "INSERT INTO customers (name, address) VALUES (%s, %s)"
+    #val = ("John", "Highway 21")
+    #mycursor.execute(sql, val)
+
+    #mydb.commit()
     return jsonify({'response': 'pong!'})
 
-
-# Create Data Routes
-@app.route('/', methods=['POST'])
-def addThing():
-    #new_product = {
-    #    'name': request.json['name'],
-    #    'price': request.json['price'],
-    #    'quantity': 10
-    #}
-    return jsonify({'message': 'Thing created'})
-
-
-# Update Data Route
-@app.route('/<string:product_name>', methods=['PUT'])
-def editThing(product_name):
-    
-    return jsonify({'message': 'Thing added'})
-
-# DELETE Data Route
-@app.route('/<string:product_name>', methods=['DELETE'])
-def deleteThing(product_name):
-    return jsonify({'message': 'Thing deleted'})
+# End Load
+@app.route('/python/finalizarCarga')
+def finalizarCarga():
+    print(mycursor.rowcount, "record inserted.")
+    return jsonify({'response': 'pong!'})
     
 
 if __name__ == '__main__':
