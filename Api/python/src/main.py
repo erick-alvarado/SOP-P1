@@ -1,6 +1,8 @@
-from os import system
 import mysql.connector
+import json
 from flask import Flask, jsonify, request
+from google.cloud import pubsub_v1
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -11,12 +13,15 @@ mydb = mysql.connector.connect(
   password="g%dEh7uWVS9j0p*",
   database="olympics_game_news"
 )
-mycursor = mydb.cursor()
 
 # Start load
 @app.route('/python/iniciarCarga')
 def iniciarCarga():
+    global mycursor
+    global time
+
     mycursor = mydb.cursor()
+    time = datetime.today()
     return jsonify({'response': 'Python db connected!'})
 
 # Publish 
@@ -34,7 +39,33 @@ def publicar():
 # End Load
 @app.route('/python/finalizarCarga')
 def finalizarCarga():
-    print(mycursor.rowcount, "record inserted.")
+    #Time loading
+    loadtime = (datetime.today()-time).total_seconds()
+    # TODO(developer)
+    project_id = "sopess1"
+    topic_id = "olimpiada"
+
+    publisher = pubsub_v1.PublisherClient()
+    topic_path = publisher.topic_path(project_id, topic_id)
+
+    cosmo_json = json.dumps({
+        "guardados": mycursor.rowcount,
+        "api": "Python",
+        "tiempoDeCarga":loadtime,
+        "bd": "CosmoDB"
+    })
+    sql_json = json.dumps({
+        "guardados": mycursor.rowcount,
+        "api": "Python",
+        "tiempoDeCarga":loadtime,
+        "bd": "MySQL"
+    })
+    sql_json = sql_json.encode('utf-8')
+    cosmo_json = cosmo_json.encode('utf-8')
+
+    future = publisher.publish(topic_path, cosmo_json)
+    future = publisher.publish(topic_path, sql_json)
+
     return jsonify({'response': 'pong!'})
     
 
