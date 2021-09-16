@@ -1,0 +1,13 @@
+prefix=C:\Users\l4kz4\Documents\GitHub\SOP-P1\api\rust\target\debug\build\libz-sys-fa59927e310148aa\out
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+sharedlibdir=@sharedlibdir@
+includedir=@includedir@
+
+Name: zlib
+Description: zlib compression library
+Version: @VERSION@
+
+Requires:
+Libs: -L${libdir} -L${sharedlibdir} -lz
+Cflags: -I${includedir}
