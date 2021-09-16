@@ -8,9 +8,10 @@ const socketio = require("socket.io");
 
 //Conexion a la base de datos
 require("./database/mongoDB").conectar();
-require("./database/mysql");
+//require("./database/mysql");
 const mongo = require("./routes/mongo/publicacion");
-const mysql = require("./routes/mysql/publicacion");
+/* const mysql = require("./routes/mysql/publicacion"); */
+const subscriber = require("./routes/subscriber/subscriber");
 
 //settings
 app.set("port", process.env.PORT);
@@ -40,8 +41,8 @@ app.get("/", (req, res) => {
 });
 
 app.use("/mongo", mongo);
-app.use("/mysql", mysql);
-
+/* app.use("/mysql", mysql); */
+app.use("/subscriber", subscriber);
 //escuchando el servidor
 server.listen(app.get("port"), () => {
   console.log(`Server on port ${app.get("port")}`);
