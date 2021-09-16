@@ -3,42 +3,33 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"go/src/database"
+	"go/src/entorno"
+	"go/src/models"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/joho/godotenv"
-	"go.mongodb.org/mongo-driver/mongo/readpref"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
+var numMongo int
+var clienteMongo *mongo.Client
+
 type notify struct {
-	Name  string    `json:"name"`
-	State bool      `json:"state"`
-	Time  time.Time `json:"time"`
-	Error bool      `json:"error"`
+	Name      string    `json:"name"`
+	State     bool      `json:"state"`
+	Time      time.Time `json:"time"`
+	Error     bool      `json:"error"`
+	Insercion int       `json:"insercion"`
 }
 
 type allNotifies []notify
-
-type task struct {
-	Id      int    `json:"id"`
-	Name    string `json:"name"`
-	Content string `json:"content"`
-}
-
-type allTasks []task
-
-var tasks = allTasks{
-	{
-		Id:      1,
-		Name:    "Task one",
-		Content: "Some content",
-	},
-}
 
 func iniciarCargaMysql() notify {
 	var notificacion = notify{
@@ -80,25 +71,12 @@ func iniciarCargaMongodb() notify {
 		Time:  time.Now(),
 		Error: false,
 	}
-	db, err := database.GetConnectionMongodb()
-	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
-	err = db.Connect(ctx)
+	err := ConnectMongo()
 	if err != nil {
-		log.Fatal(err)
 		notificacion.State = false
 		notificacion.Error = true
 		return notificacion
 	}
-	defer db.Disconnect(ctx)
-	err = db.Ping(ctx, readpref.Primary())
-	if err != nil {
-		log.Fatal(err)
-		notificacion.State = false
-		notificacion.Error = true
-		return notificacion
-	}
-	fmt.Println("MongoDB is connected to: " + os.Getenv("MONGO_NAME"))
-
 	return notificacion
 }
 
@@ -111,7 +89,22 @@ func iniciarCarga(w http.ResponseWriter, r *http.Request) {
 }
 
 func publicar(w http.ResponseWriter, r *http.Request) {
-	json.NewEncoder(w).Encode(tasks)
+	var publicacion models.Publicacion
+	reqBody, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		log.Println(err)
+		json.NewEncoder(w).Encode(false)
+		return
+	}
+
+	json.Unmarshal(reqBody, &publicacion)
+	err = InsertMongo(publicacion)
+	if err != nil {
+		log.Println(err)
+		json.NewEncoder(w).Encode(false)
+		return
+	}
+	json.NewEncoder(w).Encode(true)
 }
 
 func finalizarCargaMysql() notify {
@@ -137,22 +130,17 @@ func finalizarCargaMysql() notify {
 
 func finalizarCargaMongodb() notify {
 	var notificacion = notify{
-		Name:  "Mongo",
-		State: false,
-		Time:  time.Now(),
-		Error: false,
+		Name:      "Mongo",
+		State:     false,
+		Time:      time.Now(),
+		Error:     false,
+		Insercion: numMongo,
 	}
-	db, err := database.GetConnectionMongodb()
-	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
-	err = db.Connect(ctx)
+	err := DisconnectMongo()
 	if err != nil {
-		log.Fatal(err)
 		notificacion.Error = true
 		return notificacion
 	}
-	// Terminar conexión al terminar función
-	defer db.Disconnect(ctx)
-	fmt.Println("MongoDB is disconnected to: " + os.Getenv("MONGO_NAME"))
 	return notificacion
 }
 
@@ -170,26 +158,77 @@ func indexRoute(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	//Iniciamos variables de entorno
-	loadEnv()
+	entorno.LoadEnv()
 	port := os.Getenv("PORT")
 	//Creamos el router
 	router := mux.NewRouter().StrictSlash(true)
 	//Ruta principal
 	router.HandleFunc("/", indexRoute)
 	//Ruta para conectarse a la base de datos y esperar los datos
-	router.HandleFunc("/endpoint/go/iniciarCarga", iniciarCarga)
+	router.HandleFunc("/endpoint/go/iniciarCarga", iniciarCarga).Methods("GET")
 	//Ruta para publicar la informacion de la base de datos
-	router.HandleFunc("/endpoint/go/publicar", publicar)
+	router.HandleFunc("/endpoint/go/publicar", publicar).Methods("POST")
 	//Ruta para cerrar la conexion de la base de datos y mandar una notificacion
-	router.HandleFunc("/endpoint/go/finalizarCarga", finalizarCarga)
+	router.HandleFunc("/endpoint/go/finalizarCarga", finalizarCarga).Methods("GET")
 	//Escuchamos al puerto
 	fmt.Println("Server on port:" + port)
 	log.Fatal(http.ListenAndServe(":"+port, router))
 }
 
-func loadEnv() {
-	err := godotenv.Load()
+func ConnectMongo() error {
+	var err error
+	clienteMongo, err = mongo.Connect(context.TODO(), database.GetClient())
 	if err != nil {
-		log.Fatal("Error loading .env")
+		log.Println(err)
+		return err
+	}
+	err = clienteMongo.Ping(context.TODO(), nil)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	fmt.Println("MongoDB is connected to: " + os.Getenv("MONGO_NAME"))
+	return nil
+}
+
+func DisconnectMongo() error {
+	var err error
+	clienteMongo, err = mongo.Connect(context.TODO(), database.GetClient())
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	err = clienteMongo.Disconnect(context.TODO())
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	fmt.Println("MongoDB is disconnected to: " + os.Getenv("MONGO_NAME"))
+	numMongo = 0
+	return nil
+}
+
+func InsertMongo(p models.Publicacion) error {
+	/* 	var err error
+	   	clienteMongo, err = mongo.Connect(context.TODO(), database.GetClient())
+	   	if err != nil {
+	   		fmt.Println("No ha iniciado conexion con mongo")
+	   		return err
+	   	} */
+	if clienteMongo != nil {
+		collection := clienteMongo.Database("olympics-game-news").Collection("publicaciones")
+		insertResult, err := collection.InsertOne(context.TODO(), p)
+		if err != nil {
+			fmt.Println("the collection does not exist in MongoDB ")
+			return err
+		}
+		//fmt.Println(collection.Name())
+		fmt.Println("Publicacion had been inserted: ", insertResult.InsertedID)
+		numMongo++
+		return nil
+	} else {
+		fmt.Println("MongoDB is not connected")
+		return errors.New("unavailable")
 	}
 }
