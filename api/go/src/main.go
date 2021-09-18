@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -12,6 +13,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 
 	"cloud.google.com/go/pubsub"
 	"github.com/gorilla/mux"
@@ -21,6 +23,7 @@ import (
 var numMongo int
 var numMysql int
 var clienteMongo *mongo.Client
+var clienteMysql *sql.DB
 
 type notify struct {
 	Guardados     int    `json:"guardados"`
@@ -38,17 +41,18 @@ func iniciarCargaMysql() notify {
 		TiempoDeCarga: 0,
 		Bd:            "Mysql",
 	}
-	db, err := database.GetConnectionMysql()
+	var err error
+	clienteMysql, err = database.GetConnectionMysql()
 	if err != nil {
 		fmt.Printf("Error obteniendo base de datos: %v", err)
 		fmt.Println()
 		return notificacion
 	}
 	// Terminar conexión al terminar función
-	defer db.Close()
+	defer clienteMysql.Close()
 
 	// Ahora vemos si tenemos conexión
-	err = db.Ping()
+	err = clienteMysql.Ping()
 	if err != nil {
 		fmt.Printf("Error conectando: %v", err)
 		fmt.Println()
@@ -75,7 +79,7 @@ func iniciarCargaMongodb() notify {
 
 func iniciarCarga(w http.ResponseWriter, r *http.Request) {
 	var notifies = allNotifies{
-		//iniciarCargaMysql(),
+		iniciarCargaMysql(),
 		iniciarCargaMongodb(),
 	}
 	json.NewEncoder(w).Encode(notifies)
@@ -107,7 +111,8 @@ func finalizarCargaMysql() notify {
 		TiempoDeCarga: 0,
 		Bd:            "Mysql",
 	}
-	db, err := database.GetConnectionMysql()
+	var err error
+	clienteMysql, err = database.GetConnectionMysql()
 	if err != nil {
 		fmt.Printf("Error obteniendo base de datos: %v", err)
 		fmt.Println()
@@ -115,7 +120,8 @@ func finalizarCargaMysql() notify {
 		return notificacion
 	}
 	// Terminar conexión al terminar función
-	defer db.Close()
+	defer clienteMysql.Close()
+	numMysql = 0
 	fmt.Println("Mysql is disconnected to: " + os.Getenv("MYSQL_NAME"))
 	return notificacion
 }
@@ -137,12 +143,12 @@ func finalizarCargaMongodb() notify {
 func finalizarCarga(w http.ResponseWriter, r *http.Request) {
 	var notifies = allNotifies{
 		finalizarCargaMongodb(),
-		//finalizarCargaMysql(),
+		finalizarCargaMysql(),
 	}
 	mongoDB, _ := json.Marshal(notifies[0])
 	pub(string(mongoDB))
-	/* mysql, _ := json.Marshal(notifies[1])
-	pub(string(mysql)) */
+	mysql, _ := json.Marshal(notifies[1])
+	pub(string(mysql))
 	json.NewEncoder(w).Encode(notifies)
 }
 
@@ -227,6 +233,40 @@ func InsertMongo(p models.Publicacion) error {
 	}
 }
 
+func InsertMysql(p models.Publicacion) error {
+	/* 	var err error
+	   	clienteMongo, err = mongo.Connect(context.TODO(), database.GetClient())
+	   	if err != nil {
+	   		fmt.Println("No ha iniciado conexion con mongo")
+	   		return err
+	   	} */
+	if clienteMysql != nil {
+		var cadena string
+		cadena2 := "\"" + p.Nombre + "\",\"" + p.Comentario + "\",\"" + p.Fecha + "\"," + strconv.Itoa(p.Upvotes) + "," + strconv.Itoa(p.Downvotes)
+
+		for i := 0; i < len(p.Hashtags); i++ {
+			if i == len(p.Hashtags)-1 {
+				cadena += p.Hashtags[i]
+			} else {
+				cadena += p.Hashtags[i] + "#"
+			}
+		}
+		fmt.Println("call split(\"" + cadena + "\",\"#\"," + cadena2 + ")")
+
+		insert, err := clienteMysql.Query("call split(\"" + cadena + "\",\"#\"," + cadena2 + ")")
+		if err != nil {
+			return err
+		}
+		defer insert.Close()
+		fmt.Println("Succesfully inserted into Publicacion, Hashtag tables")
+		numMysql++
+		return nil
+	} else {
+		fmt.Println("Mysql is not connected")
+		return errors.New("unavailable")
+	}
+}
+
 func pub(msg string) error {
 	// Definimos el ProjectID del proyecto
 	// Este dato lo sacamos de Google Cloud
@@ -259,7 +299,7 @@ func pub(msg string) error {
 	if err != nil {
 		fmt.Println("error")
 		fmt.Println(err)
-		return fmt.Errorf("Error: %v", err)
+		return err
 	}
 
 	// El mensaje fue publicado correctamente
