@@ -4,6 +4,7 @@ from locust import HttpUser, task, between
 #locust --locustfile traffic.py
 #http://localhost:8089/
 
+
 class MessageTraffic(HttpUser):
     def on_start(self):
         try:

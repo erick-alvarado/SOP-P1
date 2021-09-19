@@ -21,8 +21,8 @@ create table Hashtag(
 create table Publicacion_Hashtag(
 	id_publicacion int,
     id_hashtag int,
-    foreign key (id_publicacion) references Publicacion(id_publicacion),
-    foreign key (id_hashtag) references Hashtag(id_hashtag)
+    foreign key (id_publicacion) references Publicacion(id_publicacion) ON DELETE CASCADE,
+    foreign key (id_hashtag) references Hashtag(id_hashtag) ON DELETE CASCADE
 );
 
 
