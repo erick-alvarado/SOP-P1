@@ -3170,6 +3170,7 @@ dependencies = [
  "goauth",
  "mongodb",
  "mysql",
+ "nanoid",
  "openssl",
  "rocket",
  "rocket_contrib",
