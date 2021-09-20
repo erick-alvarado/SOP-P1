@@ -1,7 +1,7 @@
 package entorno
 
 import (
-	"log"
+	"fmt"
 
 	"github.com/joho/godotenv"
 )
@@ -9,6 +9,6 @@ import (
 func LoadEnv() {
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatal("Error loading .env")
+		fmt.Println("Error loading .env")
 	}
 }

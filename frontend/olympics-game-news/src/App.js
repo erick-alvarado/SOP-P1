@@ -1,10 +1,9 @@
-
-import Mysql from "./components/Publicacion.jsx";
+import Noticias from "./components/Noticias";
 
 function App() {
   return (
     <div className="App">
-      <Mysql></Mysql>
+      <Noticias />
     </div>
   );
 }
