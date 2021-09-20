@@ -61,7 +61,6 @@ async fn ps(){
     let result = topic.publish(PUB_MYSQL.clone()).await;
     println!("Refreshed token: {}", client.refresh_token().is_ok());
     let result2 = topic.publish(PUB_MONGO.clone()).await;
-    println!("{:?}", result2);
   }
 }
 #[get("/")]
