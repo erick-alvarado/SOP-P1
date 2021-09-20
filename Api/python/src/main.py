@@ -1,21 +1,28 @@
-from itertools import count
-import mysql.connector
-import json
 from flask import Flask, jsonify, request
 from google.cloud import pubsub_v1
 from datetime import datetime
+import json
 
+
+import mysql.connector
+import pymongo
+from pymongo import MongoClient
 #$env:GOOGLE_APPLICATION_CREDENTIALS="KEY_PATH"
 
 app = Flask(__name__)
 
 # Connection Database
-mydb = mysql.connector.connect(
-  host="35.231.149.154",
-  user="root",
-  password="g%dEh7uWVS9j0p*",
-  database="olympics_game_news"
-)
+#mydb = mysql.connector.connect(
+#  host="35.231.149.154",
+#  user="root",
+#  password="g%dEh7uWVS9j0p*",
+#  database="olympics_game_news"
+#)
+
+CONNECTION_STRING = "mongodb://sopes2021:RylMjjNwi0uQQ62iil5E54EEHoBacSLPkatrxpxWhH1vky3x9gWE5pWjexkQb0NhxwvWNBTQ6xx8f3MAAHDjeg==@sopes2021.mongo.cosmos.azure.com:10255/olympics-game-news?ssl=true&replicaSet=globaldb&retrywrites=false"
+client = MongoClient(CONNECTION_STRING)
+mydb_mongo = client['olympics-game-news']
+mydb2 = mydb_mongo['publicaciones']
 
 
 # Start load
@@ -25,7 +32,7 @@ def iniciarCarga():
     global time
     global counter 
     counter = 0
-    mycursor = mydb.cursor()
+    #mycursor = mydb.cursor()
     time = datetime.today()
     return jsonify({'response': 'Python db connected!'})
 
@@ -34,18 +41,23 @@ def iniciarCarga():
 def publicar():
     global counter
     json_data = request.json
+    
+
+    #Insert MySQL
     hashtags = ""
     for h in request.json['hashtags']:
         hashtags+=h+","
     date = datetime.today()
     sql = 'call split(%s,%s,%s,%s,%s,%s,%s);'
     val = (hashtags, ",",json_data['nombre'],json_data['comentario'],date,json_data['upvotes'],json_data['downvotes'])
-    
-    #sql = "INSERT INTO customers (name, address) VALUES (%s, %s)"
-    #val = ("John", "Highway 21")
-    mycursor.execute(sql, val)   
-    mydb.commit()
-    counter+=1
+    #mycursor.execute(sql, val)   
+    #mydb.commit()
+
+    #Insert Mongo
+    mydb2.insert_one(json_data)
+
+
+    #counter+=1
     return jsonify({'response': 'pong!'})
 
 # End Load
