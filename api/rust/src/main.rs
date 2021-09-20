@@ -115,7 +115,7 @@ unsafe fn lol(){
     let mut pm : PubSub = PubSub{
       guardados : 0,
       api : String::from("rust"),
-      tiempoDeCarga: 0,
+      tiempoDeCarga: 0, 
       bd : String::from("Google SQL"),
     };
     let mut pc : PubSub = PubSub{
