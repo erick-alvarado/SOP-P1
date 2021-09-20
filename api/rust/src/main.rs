@@ -100,10 +100,13 @@ unsafe fn lol(){
     unsafe{
       let google_credentials = env::var("GOOGLE_APPLICATION_CREDENTIALS").expect("failed to get MONGODB_URL");
       let topic_name = env::var("TOPIC").expect("failed to get MONGODB_URL");
+      println!("{}", topic_name);
       let credentials = goauth::credentials::Credentials::from_file(&google_credentials).unwrap();
       let mut client = gcp_pubsub::Client::new(credentials);
+      println!("Refreshed token: {}", client.refresh_token().is_ok());
       let topic = client.topic(&topic_name);
       let serialized_user = serde_json::to_string(&Pub_mysql).unwrap();
+      println!("{}", serialized_user);
       let result = topic.publish(serialized_user);
       let serialized_user2 = serde_json::to_string(&Pub_mongo).unwrap();
       let result2 = topic.publish(serialized_user2);
