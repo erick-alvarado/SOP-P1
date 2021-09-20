@@ -4,6 +4,8 @@
 extern crate rocket;
 extern crate gcp_pubsub;
 extern crate goauth;
+extern crate serde;
+extern crate serde_json;
 
 use rocket_contrib::json::Json;
 use std::env;
@@ -14,6 +16,8 @@ use serde::{Deserialize, Serialize};
 use std::time::{Duration, SystemTime};
 use std::thread::sleep;
 use mongodb::{bson::doc, sync::Client};
+use futures::executor::block_on;
+use serde_json::json;
 
 #[derive(Clone, Deserialize, Serialize, Debug)]
 struct Publicacion {
@@ -25,42 +29,40 @@ struct Publicacion {
   downvotes: i32
 }
 
-#[derive(Clone, Deserialize, Serialize, Debug)]
+#[derive(Clone, Deserialize, Serialize, Debug, Default)]
 struct PubSub {
-  guardados:i32,
-  api : String,
-  tiempoDeCarga: u64,
-  bd: String,
+  pub guardados:i32,
+  pub api : String,
+  pub tiempoDeCarga: u64,
+  pub bd: String,
 }
 
-static mut Pub_mysql : PubSub = PubSub{
+static mut PUB_MYSQL : PubSub = PubSub{
   guardados : 0,
   api : String::new(),
   tiempoDeCarga: 0,
   bd : String::new(),
 };
-static mut Pub_mongo : PubSub = PubSub{
+static mut PUB_MONGO : PubSub = PubSub{
   guardados : 0,
   api : String::new(),
   tiempoDeCarga: 0,
   bd : String::new(),
 };
 
-
-
-
-unsafe fn lol(){
-  let sys_time = SystemTime::now();
-  let one_sec = Duration::from_secs(20);
-  sleep(one_sec);
-  let new_sys_time = SystemTime::now();
-  let difference = new_sys_time.duration_since(sys_time)
-  .expect("Clock may have gone backwards");
-  Pub_mysql.tiempoDeCarga = difference.as_secs();
-  println!("{} {} {} {}", Pub_mysql.tiempoDeCarga, Pub_mysql.guardados, Pub_mysql.api, Pub_mysql.bd);
+async fn ps(){
+  unsafe{
+    let google_credentials = std::env::var("GOOGLE_APPLICATION_CREDENTIALS").unwrap();
+    let topic_name = std::env::var("TOPIC").unwrap();
+    let credentials = goauth::credentials::Credentials::from_file(&google_credentials).unwrap();
+    let mut client = gcp_pubsub::Client::new(credentials);
+    println!("Refreshed token: {}", client.refresh_token().is_ok());
+    let topic = client.topic(&topic_name);
+    let result = topic.publish(PUB_MYSQL.clone()).await;
+    println!("Refreshed token: {}", client.refresh_token().is_ok());
+    let result2 = topic.publish(PUB_MONGO.clone()).await;
+  }
 }
-
-
 #[get("/")]
   fn index() -> &'static str {
       "Bienvenido API Rust"
@@ -82,40 +84,22 @@ unsafe fn lol(){
       bd : String::from("Cosmo DB"),
     };
     unsafe{
-      Pub_mysql = pm;
-      Pub_mongo = pc;
+      PUB_MYSQL = pm;
+      PUB_MONGO = pc;
     }
     "Carga Iniciada"
   }
 
   #[get("/finalizarCarga")]
   fn finalizar_carga() -> &'static str {
-    unsafe{
-      println!("{},{},{},{}",Pub_mysql.api,Pub_mysql.bd,Pub_mysql.tiempoDeCarga,Pub_mysql.guardados);
-    }
-    unsafe{
-      println!("{},{},{},{}",Pub_mongo.api,Pub_mongo.bd,Pub_mongo.tiempoDeCarga,Pub_mongo.guardados);
-    }
     
-    unsafe{
-      let google_credentials = env::var("GOOGLE_APPLICATION_CREDENTIALS").expect("failed to get MONGODB_URL");
-      let topic_name = env::var("TOPIC").expect("failed to get MONGODB_URL");
-      println!("{}", topic_name);
-      let credentials = goauth::credentials::Credentials::from_file(&google_credentials).unwrap();
-      let mut client = gcp_pubsub::Client::new(credentials);
-      println!("Refreshed token: {}", client.refresh_token().is_ok());
-      let topic = client.topic(&topic_name);
-      let serialized_user = serde_json::to_string(&Pub_mysql).unwrap();
-      println!("{}", serialized_user);
-      let result = topic.publish(serialized_user);
-      let serialized_user2 = serde_json::to_string(&Pub_mongo).unwrap();
-      let result2 = topic.publish(serialized_user2);
-    }
+      let future = ps(); // Nothing is printed
+      block_on(future);
 
     let mut pm : PubSub = PubSub{
       guardados : 0,
       api : String::from("rust"),
-      tiempoDeCarga: 0,
+      tiempoDeCarga: 0, 
       bd : String::from("Google SQL"),
     };
     let mut pc : PubSub = PubSub{
@@ -125,8 +109,8 @@ unsafe fn lol(){
       bd : String::from("Cosmo DB"),
     };
     unsafe{
-      Pub_mysql = pm;
-      Pub_mongo = pc;
+      PUB_MYSQL = pm;
+      PUB_MONGO = pc;
     }
     "Carga Finalizada"
   }
@@ -179,8 +163,8 @@ unsafe fn lol(){
       let difference = new_sys_time.duration_since(sys_time)
       .expect("Clock may have gone backwards");
       println!("{}", difference.as_secs());
-      Pub_mysql.tiempoDeCarga = Pub_mysql.tiempoDeCarga + difference.as_secs();
-      Pub_mysql.guardados = Pub_mysql.guardados +1;
+      PUB_MYSQL.tiempoDeCarga = PUB_MYSQL.tiempoDeCarga + difference.as_secs();
+      PUB_MYSQL.guardados = PUB_MYSQL.guardados +1;
     }
 
     let sys_time2 = SystemTime::now();
@@ -201,14 +185,12 @@ unsafe fn lol(){
       let difference2 = new_sys_time2.duration_since(sys_time2)
       .expect("Clock may have gone backwards");
       println!("{}", difference2.as_secs());
-      Pub_mongo.tiempoDeCarga = Pub_mongo.tiempoDeCarga + difference2.as_secs();
-      Pub_mongo.guardados = Pub_mongo.guardados +1;
+      PUB_MONGO.tiempoDeCarga = PUB_MONGO.tiempoDeCarga + difference2.as_secs();
+      PUB_MONGO.guardados = PUB_MONGO.guardados +1;
     }
   }
 
 fn main(){
   dotenv().expect(".env file not found");
-  
-  
   rocket::ignite().mount("/endpoint/rust",routes![index, iniciar_carga, finalizar_carga, publicar],).launch();   
 }
