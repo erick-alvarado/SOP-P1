@@ -3,10 +3,9 @@ from google.cloud import pubsub_v1
 from datetime import datetime
 import json
 
-
 import mysql.connector
 from pymongo import MongoClient
-#$env:GOOGLE_APPLICATION_CREDENTIALS="KEY_PATH"
+#$env:GOOGLE_APPLICATION_CREDENTIALS="C:\Users\alexa\OneDrive\Desktop\Semestre 7\Sopes 1\Laboratorio\Proyecto 1\SOP-P1\Api\python\src\sopess1-0650dcee678c.json"
 
 app = Flask(__name__)
 
@@ -47,7 +46,8 @@ def publicar():
     for h in request.json['hashtags']:
         hashtags+=h+","
     sql = 'call split(%s,%s,%s,%s,%s,%s,%s);'
-    val = (hashtags, ",",json_data['nombre'],json_data['comentario'],json_data['fecha'],json_data['upvotes'],json_data['downvotes'])
+    a = datetime.strptime(json_data['fecha'], "%d/%m/%Y")
+    val = (hashtags, ",",json_data['nombre'],json_data['comentario'],a.strftime('%Y-%m-%d %H:%M:%S'),json_data['upvotes'],json_data['downvotes'])
     mycursor.execute(sql, val)   
     mydb.commit()
 
