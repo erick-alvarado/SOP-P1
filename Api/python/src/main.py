@@ -12,12 +12,12 @@ from pymongo import MongoClient
 app = Flask(__name__)
 
 # Connection Database
-#mydb = mysql.connector.connect(
-#  host="35.231.149.154",
-#  user="root",
-#  password="g%dEh7uWVS9j0p*",
-#  database="olympics_game_news"
-#)
+mydb = mysql.connector.connect(
+  host="35.231.149.154",
+  user="root",
+  password="g%dEh7uWVS9j0p*",
+  database="olympics_game_news"
+)
 
 CONNECTION_STRING = "mongodb://sopes2021:RylMjjNwi0uQQ62iil5E54EEHoBacSLPkatrxpxWhH1vky3x9gWE5pWjexkQb0NhxwvWNBTQ6xx8f3MAAHDjeg==@sopes2021.mongo.cosmos.azure.com:10255/olympics-game-news?ssl=true&replicaSet=globaldb&retrywrites=false"
 client = MongoClient(CONNECTION_STRING)
@@ -32,7 +32,7 @@ def iniciarCarga():
     global time
     global counter 
     counter = 0
-    #mycursor = mydb.cursor()
+    mycursor = mydb.cursor()
     time = datetime.today()
     return jsonify({'response': 'Python db connected!'})
 
@@ -50,14 +50,14 @@ def publicar():
     date = datetime.today()
     sql = 'call split(%s,%s,%s,%s,%s,%s,%s);'
     val = (hashtags, ",",json_data['nombre'],json_data['comentario'],date,json_data['upvotes'],json_data['downvotes'])
-    #mycursor.execute(sql, val)   
-    #mydb.commit()
+    mycursor.execute(sql, val)   
+    mydb.commit()
 
     #Insert Mongo
     mydb2.insert_one(json_data)
 
 
-    #counter+=1
+    counter+=1
     return jsonify({'response': 'pong!'})
 
 # End Load
