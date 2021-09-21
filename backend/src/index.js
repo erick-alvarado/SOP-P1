@@ -4,7 +4,10 @@ const cors = require("cors");
 const morgan = require("morgan");
 const app = express();
 const http = require("http");
-const socketio = require("socket.io");
+const { Server } = require("socket.io");
+
+const server = http.createServer(app);
+const io = new Server(server);
 
 //Conexion a la base de datos
 require("./database/mongoDB").conectar();
@@ -21,19 +24,7 @@ app.use(morgan("dev"));
 app.use(cors());
 app.use(express.json());
 
-const server = http.createServer(app);
-const io = socketio(server, {
-  cors: {
-    origin: "*",
-  },
-});
 
-io.on("connection", (socket) => {
-  console.log("conectado");
-  socket.on("conectado", () => {
-    console.log("Usuario conectado");
-  });
-});
 
 //routes
 app.get("/", (req, res) => {
@@ -46,4 +37,11 @@ app.use("/subscriber", subscriber);
 //escuchando el servidor
 server.listen(app.get("port"), () => {
   console.log(`Server on port ${app.get("port")}`);
+});
+
+io.on('connection', (socket) => {
+  console.log('a user connected');
+  socket.on('disconnect', () => {
+    console.log('user disconnected');
+  });
 });

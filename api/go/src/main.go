@@ -14,6 +14,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"time"
 
 	"cloud.google.com/go/pubsub"
 	"github.com/gorilla/mux"
@@ -24,6 +25,8 @@ var numMongo int
 var numMysql int
 var clienteMongo *mongo.Client
 var clienteMysql *sql.DB
+var tiempoMongo int
+var tiempoMysql int
 
 type notify struct {
 	Guardados     int    `json:"guardados"`
@@ -49,7 +52,7 @@ func iniciarCargaMysql() notify {
 		return notificacion
 	}
 	// Terminar conexión al terminar función
-	defer clienteMysql.Close()
+	/* defer clienteMysql.Close() */
 
 	// Ahora vemos si tenemos conexión
 	err = clienteMysql.Ping()
@@ -101,14 +104,20 @@ func publicar(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(false)
 		return
 	}
+	err = InsertMysql(publicacion)
+	if err != nil {
+		log.Println(err)
+		json.NewEncoder(w).Encode(false)
+		return
+	}
 	json.NewEncoder(w).Encode(true)
 }
 
 func finalizarCargaMysql() notify {
 	var notificacion = notify{
-		Guardados:     0,
+		Guardados:     numMysql,
 		Api:           "Go",
-		TiempoDeCarga: 0,
+		TiempoDeCarga: tiempoMysql,
 		Bd:            "Mysql",
 	}
 	var err error
@@ -122,6 +131,7 @@ func finalizarCargaMysql() notify {
 	// Terminar conexión al terminar función
 	defer clienteMysql.Close()
 	numMysql = 0
+	tiempoMysql = 0
 	fmt.Println("Mysql is disconnected to: " + os.Getenv("MYSQL_NAME"))
 	return notificacion
 }
@@ -130,7 +140,7 @@ func finalizarCargaMongodb() notify {
 	var notificacion = notify{
 		Guardados:     numMongo,
 		Api:           "Go",
-		TiempoDeCarga: 0,
+		TiempoDeCarga: tiempoMongo,
 		Bd:            "CosmosDB",
 	}
 	err := DisconnectMongo()
@@ -206,6 +216,7 @@ func DisconnectMongo() error {
 	}
 	fmt.Println("MongoDB is disconnected to: " + os.Getenv("MONGO_NAME"))
 	numMongo = 0
+	tiempoMongo = 0
 	return nil
 }
 
@@ -217,6 +228,7 @@ func InsertMongo(p models.Publicacion) error {
 	   		return err
 	   	} */
 	if clienteMongo != nil {
+		tInicio := time.Now().UnixNano() / 1e9
 		collection := clienteMongo.Database("olympics-game-news").Collection("publicaciones")
 		insertResult, err := collection.InsertOne(context.TODO(), p)
 		if err != nil {
@@ -226,6 +238,8 @@ func InsertMongo(p models.Publicacion) error {
 		//fmt.Println(collection.Name())
 		fmt.Println("Publicacion had been inserted: ", insertResult.InsertedID)
 		numMongo++
+		tFinal := time.Now().UnixNano() / 1e9
+		tiempoMongo = int(tFinal) - int(tInicio)
 		return nil
 	} else {
 		fmt.Println("MongoDB is not connected")
@@ -234,16 +248,10 @@ func InsertMongo(p models.Publicacion) error {
 }
 
 func InsertMysql(p models.Publicacion) error {
-	/* 	var err error
-	   	clienteMongo, err = mongo.Connect(context.TODO(), database.GetClient())
-	   	if err != nil {
-	   		fmt.Println("No ha iniciado conexion con mongo")
-	   		return err
-	   	} */
 	if clienteMysql != nil {
 		var cadena string
 		cadena2 := "\"" + p.Nombre + "\",\"" + p.Comentario + "\",\"" + p.Fecha + "\"," + strconv.Itoa(p.Upvotes) + "," + strconv.Itoa(p.Downvotes)
-
+		tInicio := time.Now().UnixNano() / 1e9
 		for i := 0; i < len(p.Hashtags); i++ {
 			if i == len(p.Hashtags)-1 {
 				cadena += p.Hashtags[i]
@@ -257,9 +265,12 @@ func InsertMysql(p models.Publicacion) error {
 		if err != nil {
 			return err
 		}
-		defer insert.Close()
+		insert.Close()
 		fmt.Println("Succesfully inserted into Publicacion, Hashtag tables")
 		numMysql++
+		tFinal := time.Now().UnixNano() / 1e9
+		numMysql += int(tFinal) - int(tInicio)
+
 		return nil
 	} else {
 		fmt.Println("Mysql is not connected")
@@ -282,7 +293,7 @@ func pub(msg string) error {
 	client, err := pubsub.NewClient(ctx, projectID)
 	// Si un error ocurrio creando el nuevo cliente, entonces imprimimos un error y salimos
 	if err != nil {
-		fmt.Println("error")
+		fmt.Println(err)
 		return fmt.Errorf("pubsub.NewClient: %v", err)
 	}
 
@@ -297,7 +308,6 @@ func pub(msg string) error {
 
 	// Si hubo un error creando el mensaje, entonces mostrar que existio un error
 	if err != nil {
-		fmt.Println("error")
 		fmt.Println(err)
 		return err
 	}
