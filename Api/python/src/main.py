@@ -5,7 +5,6 @@ import json
 
 
 import mysql.connector
-import pymongo
 from pymongo import MongoClient
 #$env:GOOGLE_APPLICATION_CREDENTIALS="KEY_PATH"
 
@@ -47,9 +46,8 @@ def publicar():
     hashtags = ""
     for h in request.json['hashtags']:
         hashtags+=h+","
-    date = datetime.today()
     sql = 'call split(%s,%s,%s,%s,%s,%s,%s);'
-    val = (hashtags, ",",json_data['nombre'],json_data['comentario'],date,json_data['upvotes'],json_data['downvotes'])
+    val = (hashtags, ",",json_data['nombre'],json_data['comentario'],json_data['fecha'],json_data['upvotes'],json_data['downvotes'])
     mycursor.execute(sql, val)   
     mydb.commit()
 
