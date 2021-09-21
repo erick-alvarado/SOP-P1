@@ -2507,7 +2507,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "427c3892f9e783d91cc128285287e70a59e206ca452770ece88a76f7a3eddd72"
 
 [[package]]
-<<<<<<< Updated upstream
 name = "parking_lot"
 version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2516,25 +2515,6 @@ dependencies = [
  "lock_api 0.3.4",
  "parking_lot_core 0.6.2",
  "rustc_version",
-]
-
-[[package]]
-=======
->>>>>>> Stashed changes
-name = "parking_lot"
-version = "0.11.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7d17b78036a60663b797adeaee46f5c9dfebb86948d1255007a1d6be0271ff99"
-dependencies = [
-<<<<<<< Updated upstream
- "instant",
- "lock_api 0.4.5",
- "parking_lot_core 0.8.5",
-=======
- "lock_api 0.3.4",
- "parking_lot_core 0.6.2",
- "rustc_version",
->>>>>>> Stashed changes
 ]
 
 [[package]]
