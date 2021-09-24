@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"go/src/database"
-	"go/src/entorno"
 	"go/src/models"
 	"io/ioutil"
 	"log"
@@ -168,18 +167,18 @@ func indexRoute(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	//Iniciamos variables de entorno
-	entorno.LoadEnv()
+	//entorno.LoadEnv()
 	port := os.Getenv("PORT")
 	//Creamos el router
 	router := mux.NewRouter().StrictSlash(true)
 	//Ruta principal
 	router.HandleFunc("/", indexRoute)
 	//Ruta para conectarse a la base de datos y esperar los datos
-	router.HandleFunc("/endpoint/go/iniciarCarga", iniciarCarga).Methods("GET")
+	router.HandleFunc("/go/iniciarCarga", iniciarCarga).Methods("GET")
 	//Ruta para publicar la informacion de la base de datos
-	router.HandleFunc("/endpoint/go/publicar", publicar).Methods("POST")
+	router.HandleFunc("/go/publicar", publicar).Methods("POST")
 	//Ruta para cerrar la conexion de la base de datos y mandar una notificacion
-	router.HandleFunc("/endpoint/go/finalizarCarga", finalizarCarga).Methods("GET")
+	router.HandleFunc("/go/finalizarCarga", finalizarCarga).Methods("GET")
 	//Escuchamos al puerto
 	fmt.Println("Server on port:" + port)
 	log.Fatal(http.ListenAndServe(":"+port, router))
