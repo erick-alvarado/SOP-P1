@@ -22,11 +22,11 @@ mydb = mysql.connector.connect(
   database=os.environ.get("MYSQL_NAME")
 )
 
-user = os.Getenv("MONGO_USER")
-password = os.Getenv("MONGO_PASSWORD")
-host = os.Getenv("MONGO_HOST")
-port = os.Getenv("MONGO_PORT")
-database = os.Getenv("MONGO_NAME")
+user = os.environ.get("MONGO_USER")
+password = os.environ.get("MONGO_PASSWORD")
+host = os.environ.get("MONGO_HOST")
+port = os.environ.get("MONGO_PORT")
+database = os.environ.get("MONGO_NAME")
 
 CONNECTION_STRING = "mongodb://" + user + ":" + password + "@" + host + ":" + port + "/" + database + "?ssl=true&replicaSet=globaldb&retrywrites=false"
 
@@ -111,8 +111,8 @@ def finalizarCarga():
     try:
         publisher = pubsub_v1.PublisherClient()
         topic_path = publisher.topic_path(project_id, topic_id)
-    except:
-        print("ERR: Failed connecting to pubsub")
+    except Exception as e:
+        print("ERR: Failed connecting to pubsub. "+str(e))
         
 
     sql_json = sql_json.encode('utf-8')
@@ -130,4 +130,4 @@ def finalizarCarga():
 
 if __name__ == '__main__':
 
-    app.run(debug=True)
+    app.run(port = 5000,debug=True)
