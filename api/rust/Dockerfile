@@ -11,4 +11,6 @@ COPY . .
 
 RUN cargo build --release
 
-CMD [ "./target/release/rust" ]
+EXPOSE 8000
+
+CMD [ "target/release/rust" ]
