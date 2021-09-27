@@ -8,12 +8,12 @@ import mysql.connector
 from pymongo import MongoClient
 
 
-#import settings
+import settings
 
 
 app = Flask(__name__)
 
-
+#$env:GOOGLE_APPLICATION_CREDENTIALS="KEY_PATH"
 # Connection Database
 mydb = mysql.connector.connect(
   host= os.environ.get("MYSQL_HOST"),
@@ -39,11 +39,13 @@ mydb2 = mydb_mongo['publicaciones']
 # Start load
 @app.route('/python/iniciarCarga')
 def iniciarCarga():
-    global mycursor, time, counterSQL , counterMONGO
+    global mycursor, timeSQL,timeMONGO, counterSQL , counterMONGO
     counterSQL = 0
     counterMONGO = 0
+    timeSQL= 0
+    timeMONGO= 0 
+
     mycursor = mydb.cursor()
-    time = datetime.today()
     return jsonify({'response': 'Python db connected!'})
 
 
@@ -53,7 +55,7 @@ def iniciarCarga():
 # Publish 
 @app.route('/python/publicar', methods=['POST'])
 def publicar():
-    global counterSQL , counterMONGO
+    global counterSQL , counterMONGO, timeSQL,timeMONGO
     json_data = request.json
     
     #Insert MySQL
@@ -63,10 +65,15 @@ def publicar():
     sql = 'call split(%s,%s,%s,%s,%s,%s,%s);'
 
     try:
+
         a = datetime.strptime(json_data['fecha'], "%d/%m/%Y")
         val = (hashtags, ",",json_data['nombre'],json_data['comentario'],a.strftime('%Y-%m-%d %H:%M:%S'),json_data['upvotes'],json_data['downvotes'])
+        
+        time = datetime.today()
         mycursor.execute(sql, val)   
         mydb.commit()
+        timeSQL += (datetime.today()-time).total_seconds()
+        
         counterSQL+=1
     except:
         print("MySQL insert:"+ json.dumps(json_data))
@@ -75,7 +82,9 @@ def publicar():
 
     #Insert Mongo
     try:
+        time = datetime.today()
         mydb2.insert_one(json_data)
+        timeMONGO += (datetime.today()-time).total_seconds()
         counterMONGO+=1
     except:
         print("MONGO insert:"+ json.dumps(json_data))
@@ -88,9 +97,7 @@ def publicar():
 # End Load
 @app.route('/python/finalizarCarga')
 def finalizarCarga():
-    global counterSQL , counterMONGO
-    #Time loading
-    loadtime = (datetime.today()-time).total_seconds()
+    global counterSQL , counterMONGO, timeSQL,timeMONGO
     # TODO(developer)
     
     project_id = "sopess1"
@@ -99,13 +106,13 @@ def finalizarCarga():
     cosmo_json = json.dumps({
             "guardados":counterSQL,
             "api": "Python",
-            "tiempoDeCarga":loadtime,
+            "tiempoDeCarga":timeSQL,
             "bd": "CosmoDB"
         })
     sql_json = json.dumps({
             "guardados": counterMONGO,
             "api": "Python",
-            "tiempoDeCarga":loadtime,
+            "tiempoDeCarga":timeMONGO,
             "bd": "MySQL"
         })
     try:
