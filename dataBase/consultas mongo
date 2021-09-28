@@ -1,0 +1,40 @@
+db.publicaciones.aggregate(
+    [
+        {$group:{_id:"$hashtags",}
+    ]
+)
+
+db.publicaciones.aggregate(
+    [
+        {
+            $project:
+            {
+                
+                tag:  $hashtags 
+            }
+        }
+    ]
+)
+
+db.publicaciones.aggregate( 
+    [ 
+        {
+            $project: {
+                nombre:"$nombre"
+            }
+        }
+    ]
+)
+
+db.publicaciones.aggregate( 
+    [ 
+        {
+            $group: {
+                total: {
+                    $sum:"$upvotes"
+                }
+            }
+        }
+    ]
+)
+

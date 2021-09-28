@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"go/src/database"
+	"go/src/entorno"
 	"go/src/models"
 	"io/ioutil"
 	"log"
@@ -167,7 +168,7 @@ func indexRoute(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	//Iniciamos variables de entorno
-	//entorno.LoadEnv()
+	entorno.LoadEnv()
 	port := os.Getenv("PORT")
 	//Creamos el router
 	router := mux.NewRouter().StrictSlash(true)

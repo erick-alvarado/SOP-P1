@@ -1,3 +1,4 @@
 /src/src.exe
 .env
 script.txt
+../python/.env

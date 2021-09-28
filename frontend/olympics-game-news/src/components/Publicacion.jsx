@@ -2,6 +2,23 @@ import React from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Card, Container, Button, Image } from "react-bootstrap";
 
+var meses = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dic",
+];
+
+var hora = ["AM", "PM"];
+
 function Publicacion(props) {
   const publicacion = {
     perfil: props.id,
@@ -13,6 +30,13 @@ function Publicacion(props) {
     upvotes: props.upvotes,
     downvotes: props.downvotes,
   };
+  if (publicacion.fecha.toString() === "0000-00-00") {
+    publicacion.fecha = new Date();
+  } else if (publicacion.fecha !== null) {
+    publicacion.fecha = new Date(publicacion.fecha);
+  } else {
+    publicacion.fecha = new Date();
+  }
   return (
     <Container>
       <Card style={{ width: "40rem", marginRight: "auto", marginLeft: "auto" }}>
@@ -40,7 +64,21 @@ function Publicacion(props) {
           <Card.Text>
             <h2>{publicacion.comentario}</h2>
             <h5 style={{ color: "#959595" }}>
-              {publicacion.hora} · {publicacion.fecha}
+              {(publicacion.fecha.getHours() < 10
+                ? "0" + publicacion.fecha.getHours()
+                : publicacion.fecha.getHours()) +
+                ":" +
+                (publicacion.fecha.getMinutes() < 10
+                  ? "0" + publicacion.fecha.getMinutes()
+                  : publicacion.fecha.getMinutes()) +
+                " " +
+                hora[publicacion.fecha.getHours() >= 12 ? 1 : 0]}
+              {" · "}
+              {meses[publicacion.fecha.getMonth()] +
+                " " +
+                publicacion.fecha.getDate() +
+                ", " +
+                publicacion.fecha.getFullYear()}
             </h5>
           </Card.Text>
         </Card.Body>
