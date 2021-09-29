@@ -1,0 +1,4 @@
+/src/src.exe
+.env
+script.txt
+docker-compose.yml

@@ -10,10 +10,12 @@ const pool = mysql.createPool({
   database: process.env.MYSQL_NAME,
 });
 
-pool.getConnection(function (err, connection) {
-  if (err) console.log("Something went wrong during connection attempt");
-  if (connection) console.log("Mysql is connected to:", process.env.MYSQL_NAME);
-  connection.release();
+pool.getConnection((err, connection) => {
+  if (err) console.log("Something went wrong during connection Mysql");
+  if (connection) {
+    console.log("Mysql is connected to:", process.env.MYSQL_NAME);
+    connection.release();
+  }
   return;
 });
 

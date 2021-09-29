@@ -8,7 +8,7 @@ import mysql.connector
 from pymongo import MongoClient
 
 
-import settings
+""" import settings """
 
 
 app = Flask(__name__)

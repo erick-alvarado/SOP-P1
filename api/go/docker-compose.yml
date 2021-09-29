@@ -1,8 +1,20 @@
 version: "3.8"
 services:
-  api:
-    image: "api-golang"
+  golang:
+    image: "sevenpok/sopes1:api-golang"
     env_file:
       - .env
     ports:
       - "4000:4000"
+  python:
+    image: "sevenpok/sopes1:api-python"
+    env_file:
+      - .env
+    ports:
+      - "5000:5000"
+  rust:
+    image: "sevenpok/sopes1:api-rust"
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"

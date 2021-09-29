@@ -30,9 +30,9 @@ function Publicacion(props) {
     upvotes: props.upvotes,
     downvotes: props.downvotes,
   };
-  if (publicacion.fecha.toString() === "0000-00-00") {
+  if (publicacion.fecha !== null) {
     publicacion.fecha = new Date();
-  } else if (publicacion.fecha !== null) {
+  } else if (publicacion.fecha.toString() === "0000-00-00") {
     publicacion.fecha = new Date(publicacion.fecha);
   } else {
     publicacion.fecha = new Date();
@@ -44,6 +44,7 @@ function Publicacion(props) {
           <Card.Title style={{ display: "inline-flex" }}>
             <Image
               src={`https://randomuser.me/api/portraits/men/${publicacion.perfil}.jpg`}
+              //src={"https://image.flaticon.com/icons/png/512/16/16363.png"}
               roundedCircle
               style={{ width: "75px", height: "75px" }}
             />

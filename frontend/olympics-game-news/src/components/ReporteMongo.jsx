@@ -1,7 +1,7 @@
 import React from "react";
 import GraficaCircular from "./GraficaCircular";
 
-const Reporte1 = () => {
+const ReporteMongo = () => {
   return (
     <div style={{ width: "400px", height: "400px" }}>
       <GraficaCircular
@@ -19,4 +19,4 @@ const Reporte1 = () => {
   );
 };
 
-export default Reporte1;
+export default ReporteMongo;

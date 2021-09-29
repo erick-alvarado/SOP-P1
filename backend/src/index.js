@@ -1,7 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
-const morgan = require("morgan");
+//const morgan = require("morgan");
 const app = express();
 const http = require("http");
 const { Server } = require("socket.io");
@@ -16,20 +16,20 @@ const io = new Server(server, {
 });
 
 io.on("connection", (socket) => {
-  console.log(`User connected ${socket.id}`);
+  //console.log(`User connected ${socket.id}`);
 
   socket.on("mongo", (data, setData) => {
     setData(data);
-    console.log(data);
+    //console.log(data);
   });
 
   socket.on("mysql", (data, setData) => {
     setData(data);
-    console.log(data);
+    //console.log(data);
   });
 
   socket.on("disconnect", () => {
-    console.log("User disconnected ", socket.id);
+    //console.log("User disconnected ", socket.id);
   });
 });
 
@@ -44,7 +44,7 @@ const subscriber = require("./routes/subscriber/subscriber");
 app.set("port", process.env.PORT);
 
 //middlewares
-app.use(morgan("dev"));
+//app.use(morgan("dev"));
 app.use(cors());
 app.use(express.json());
 

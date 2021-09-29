@@ -25,14 +25,14 @@ var numMongo int
 var numMysql int
 var clienteMongo *mongo.Client
 var clienteMysql *sql.DB
-var tiempoMongo int
-var tiempoMysql int
+var tiempoMongo float64
+var tiempoMysql float64
 
 type notify struct {
-	Guardados     int    `json:"guardados"`
-	Api           string `json:"api"`
-	TiempoDeCarga int    `json:"tiempoDeCarga"`
-	Bd            string `json:"bd"`
+	Guardados     int     `json:"guardados"`
+	Api           string  `json:"api"`
+	TiempoDeCarga float64 `json:"tiempoDeCarga"`
+	Bd            string  `json:"bd"`
 }
 
 type allNotifies []notify
@@ -228,7 +228,7 @@ func InsertMongo(p models.Publicacion) error {
 	   		return err
 	   	} */
 	if clienteMongo != nil {
-		tInicio := time.Now().UnixNano() / 1e9
+		tInicio := time.Now()
 		collection := clienteMongo.Database("olympics-game-news").Collection("publicaciones")
 		insertResult, err := collection.InsertOne(context.TODO(), p)
 		if err != nil {
@@ -238,8 +238,8 @@ func InsertMongo(p models.Publicacion) error {
 		//fmt.Println(collection.Name())
 		fmt.Println("Publicacion had been inserted: ", insertResult.InsertedID)
 		numMongo++
-		tFinal := time.Now().UnixNano() / 1e9
-		tiempoMongo = int(tFinal) - int(tInicio)
+		tFinal := time.Now()
+		tiempoMongo += (float64(tFinal.Hour())-float64(tInicio.Hour()))*3600 + (float64(tFinal.Minute())-float64(tInicio.Minute()))*60 + (float64(tFinal.Second()) - float64(tInicio.Second())) + (float64(tFinal.UnixMilli())-float64(tInicio.UnixMilli()))*0.001
 		return nil
 	} else {
 		fmt.Println("MongoDB is not connected")
@@ -251,7 +251,7 @@ func InsertMysql(p models.Publicacion) error {
 	if clienteMysql != nil {
 		var cadena string
 		cadena2 := "\"" + p.Nombre + "\",\"" + p.Comentario + "\",\"" + p.Fecha + "\"," + strconv.Itoa(p.Upvotes) + "," + strconv.Itoa(p.Downvotes)
-		tInicio := time.Now().UnixNano() / 1e9
+		tInicio := time.Now()
 		for i := 0; i < len(p.Hashtags); i++ {
 			if i == len(p.Hashtags)-1 {
 				cadena += p.Hashtags[i]
@@ -268,8 +268,8 @@ func InsertMysql(p models.Publicacion) error {
 		insert.Close()
 		fmt.Println("Succesfully inserted into Publicacion, Hashtag tables")
 		numMysql++
-		tFinal := time.Now().UnixNano() / 1e9
-		numMysql += int(tFinal) - int(tInicio)
+		tFinal := time.Now()
+		tiempoMysql += (float64(tFinal.Hour())-float64(tInicio.Hour()))*3600 + (float64(tFinal.Minute())-float64(tInicio.Minute()))*60 + (float64(tFinal.Second()) - float64(tInicio.Second())) + (float64(tFinal.UnixMilli())-float64(tInicio.UnixMilli()))*0.001
 
 		return nil
 	} else {

@@ -5,7 +5,7 @@ import axios from "axios";
 import Scrollbars from "react-custom-scrollbars";
 
 let socket;
-const url = "http://localhost:4000";
+const url = "http://localhost:3001";
 
 function Mongo() {
   const [datos, setDatos] = useState([]);
@@ -29,10 +29,10 @@ function Mongo() {
       getPublicaciones()
         .then((data) => {
           socket = io(url);
-          socket.emit("mongo", data, setDatos);
+          socket.emit("mongo", data.reverse(), setDatos);
         })
         .catch();
-    }, 1000);
+    });
   });
 
   return (
@@ -47,7 +47,7 @@ function Mongo() {
       >
         {datos.map((e) => (
           <Publicacion
-            id={random(1, 99)}
+            id={e.id}
             nombre={e.nombre}
             comentario={e.comentario}
             fecha={e.fecha}
@@ -61,8 +61,5 @@ function Mongo() {
   );
 }
 
-function random(min, max) {
-  return Math.floor(Math.random() * (max - min + 1) + min);
-}
 
 export default Mongo;

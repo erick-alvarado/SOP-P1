@@ -2,6 +2,7 @@
   {
     "nombre": "Hollie Rivas",
     "comentario": "Tweet:0",
+    "fecha":"20/09/2021",
     "hashtags": ["aute"],
     "upvotes": 30,
     "downvotes": 27
@@ -9,6 +10,7 @@
   {
     "nombre": "Crosby Dean",
     "comentario": "Tweet:1",
+    "fecha":"20/09/2021",
     "hashtags": ["exercitation", "duis", "incididunt", "anim", "eu", "eiusmod"],
     "upvotes": 64,
     "downvotes": 99
@@ -16,6 +18,7 @@
   {
     "nombre": "Leonard Dudley",
     "comentario": "Tweet:2",
+    "fecha":"20/09/2021",
     "hashtags": ["pariatur"],
     "upvotes": 84,
     "downvotes": 48
@@ -23,6 +26,7 @@
   {
     "nombre": "Francesca Joseph",
     "comentario": "Tweet:3",
+    "fecha":"20/09/2021",
     "hashtags": ["occaecat"],
     "upvotes": 49,
     "downvotes": 38
@@ -30,6 +34,7 @@
   {
     "nombre": "Carey Bowers",
     "comentario": "Tweet:4",
+    "fecha":"20/09/2021",
     "hashtags": ["qui", "veniam"],
     "upvotes": 80,
     "downvotes": 26
@@ -37,6 +42,7 @@
   {
     "nombre": "Adrian Mcgowan",
     "comentario": "Tweet:5",
+    "fecha":"20/09/2021",
     "hashtags": ["duis"],
     "upvotes": 55,
     "downvotes": 88
@@ -44,6 +50,7 @@
   {
     "nombre": "Dixon Lott",
     "comentario": "Tweet:6",
+    "fecha":"20/09/2021",
     "hashtags": ["est", "duis", "elit", "nisi"],
     "upvotes": 68,
     "downvotes": 79
@@ -51,6 +58,7 @@
   {
     "nombre": "Bettye Wood",
     "comentario": "Tweet:7",
+    "fecha":"20/09/2021",
     "hashtags": ["non"],
     "upvotes": 29,
     "downvotes": 77
@@ -58,6 +66,7 @@
   {
     "nombre": "Obrien Conley",
     "comentario": "Tweet:8",
+    "fecha":"20/09/2021",
     "hashtags": [
       "pariatur",
       "quis",
@@ -74,6 +83,7 @@
   {
     "nombre": "Cooper Robbins",
     "comentario": "Tweet:9",
+    "fecha":"20/09/2021",
     "hashtags": [
       "velit",
       "ut",
@@ -91,6 +101,7 @@
   {
     "nombre": "Bailey Fitzpatrick",
     "comentario": "Tweet:10",
+    "fecha":"20/09/2021",
     "hashtags": ["est", "ullamco", "laborum"],
     "upvotes": 46,
     "downvotes": 33
@@ -98,6 +109,7 @@
   {
     "nombre": "Kline Deleon",
     "comentario": "Tweet:11",
+    "fecha":"20/09/2021",
     "hashtags": ["enim"],
     "upvotes": 36,
     "downvotes": 90
@@ -105,6 +117,7 @@
   {
     "nombre": "Estela Frazier",
     "comentario": "Tweet:12",
+    "fecha":"20/09/2021",
     "hashtags": [
       "laborum",
       "sint",
@@ -121,6 +134,7 @@
   {
     "nombre": "Janelle Bates",
     "comentario": "Tweet:13",
+    "fecha":"20/09/2021",
     "hashtags": ["magna", "cillum", "consectetur"],
     "upvotes": 35,
     "downvotes": 98
@@ -128,6 +142,7 @@
   {
     "nombre": "Cristina Wilcox",
     "comentario": "Tweet:14",
+    "fecha":"20/09/2021",
     "hashtags": ["veniam"],
     "upvotes": 81,
     "downvotes": 92
@@ -135,6 +150,7 @@
   {
     "nombre": "Oneil Jacobs",
     "comentario": "Tweet:15",
+    "fecha":"20/09/2021",
     "hashtags": [
       "culpa",
       "tempor",
@@ -151,6 +167,7 @@
   {
     "nombre": "Leigh Mayo",
     "comentario": "Tweet:16",
+    "fecha":"20/09/2021",
     "hashtags": ["sunt", "esse", "consequat", "consequat", "est", "tempor"],
     "upvotes": 45,
     "downvotes": 71
@@ -158,6 +175,7 @@
   {
     "nombre": "Reilly Irwin",
     "comentario": "Tweet:17",
+    "fecha":"20/09/2021",
     "hashtags": ["do", "enim", "ea", "ad", "culpa"],
     "upvotes": 22,
     "downvotes": 37
@@ -165,6 +183,7 @@
   {
     "nombre": "Opal Dyer",
     "comentario": "Tweet:18",
+    "fecha":"20/09/2021",
     "hashtags": ["ad", "aliqua", "duis", "aute"],
     "upvotes": 88,
     "downvotes": 93
@@ -172,6 +191,7 @@
   {
     "nombre": "Yang Hebert",
     "comentario": "Tweet:19",
+    "fecha":"20/09/2021",
     "hashtags": [
       "quis",
       "non",

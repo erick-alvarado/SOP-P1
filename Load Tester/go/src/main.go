@@ -20,7 +20,7 @@ func main() {
 	} else {
 		clienteHttp := &http.Client{}
 		//URL del load balancer
-		url := "http://localhost:4000/endpoint/go/publicar"
+		url := "http://localhost:4000/go/publicar"
 
 		for i := 0; i < 3; i++ {
 			publicacion, err := json.Marshal(data[i])
