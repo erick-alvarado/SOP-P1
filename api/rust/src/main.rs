@@ -69,7 +69,7 @@ async fn ps(){
   }
 
   #[get("/rust/iniciarCarga")]
-  fn iniciar_carga() -> &'static str {
+   fn iniciar_carga() -> &'static str {
 
     let mut pm : PubSub = PubSub{
       guardados : 0,
@@ -91,7 +91,7 @@ async fn ps(){
   }
 
   #[get("/rust/finalizarCarga")]
-  fn finalizar_carga() -> &'static str {
+   fn finalizar_carga() -> &'static str {
     
       let future = ps(); // Nothing is printed
       block_on(future);
@@ -116,7 +116,7 @@ async fn ps(){
   }
 
   #[post("/rust/publicar", format="json", data = "<json>")]
-  fn publicar(json: Json<Publicacion>)  {
+   fn publicar(json: Json<Publicacion>)  {
     let sys_time = SystemTime::now();
     let mysql_host = env::var("HOST_MYSQL").unwrap();
     let mysql_user = env::var("USER_MYSQL").unwrap();
