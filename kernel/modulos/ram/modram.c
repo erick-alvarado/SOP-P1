@@ -32,12 +32,11 @@ static int ram_proc_open(struct inode *inode, struct file *file)
 }
 
 //STRUCT OPERACIONES
-static const struct file_operations ram_proc_fops = {
-    .owner = THIS_MODULE,
-    .open = ram_proc_open,
-    .read = seq_read,
-    .llseek = seq_lseek,
-    .release = single_release,
+static const struct proc_ops ram_proc_fops = {
+    .proc_open = ram_proc_open,
+    .proc_read = seq_read,
+    .proc_lseek = seq_lseek,
+    .proc_release = single_release,
 };
 
 //MODULO PARA CREAR EL PROCESO
@@ -56,4 +55,3 @@ static void __exit ram_end(void) //Salida de modulo
 
 module_init(ram_start);
 module_exit(ram_end);
-MODULE_LICENSE("GPL");
