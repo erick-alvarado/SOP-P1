@@ -22,7 +22,7 @@ func main() {
 		//URL del load balancer
 		url := "http://localhost:4000/go/publicar"
 
-		for i := 0; i < 3; i++ {
+		for i := 0; i < 10; i++ {
 			publicacion, err := json.Marshal(data[i])
 			if err != nil {
 				// Maneja el error de acuerdo a tu situación

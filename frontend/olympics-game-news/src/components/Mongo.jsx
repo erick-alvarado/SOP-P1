@@ -1,39 +1,30 @@
 import React, { useEffect, useState } from "react";
 import Publicacion from "./Publicacion.jsx";
 import io from "socket.io-client";
-import axios from "axios";
 import Scrollbars from "react-custom-scrollbars";
+import axios from "axios";
+import { url } from "../constants/constant";
 
 let socket;
-const url = "http://localhost:3001";
 
 function Mongo() {
   const [datos, setDatos] = useState([]);
 
-  const getPublicaciones = () => {
-    return axios({
-      url: url + "/mongo",
-      method: "get",
-    })
-      .then((response) => {
-        return response.data.data;
-      })
-      .catch((error) => {
-        console.log(error);
-        return [];
-      });
-  };
-
   useEffect(() => {
-    setTimeout(function () {
-      getPublicaciones()
-        .then((data) => {
-          socket = io(url);
-          socket.emit("mongo", data.reverse(), setDatos);
+    setTimeout(() => {
+      socket = io(url);
+      axios({
+        url: url + "/mongo",
+        method: "get",
+      })
+        .then((response) => {
+          socket.emit("mongo", response.data.data.reverse(), setDatos);
         })
-        .catch();
-    });
-  });
+        .catch((error) => {
+          console.log(error);
+        });
+    }, 1000);
+  }, [datos]);
 
   return (
     <>
@@ -45,8 +36,9 @@ function Mongo() {
           marginLeft: "auto",
         }}
       >
-        {datos.map((e) => (
+        {datos.map((e, i) => (
           <Publicacion
+            key={i}
             id={e.id}
             nombre={e.nombre}
             comentario={e.comentario}
@@ -60,6 +52,5 @@ function Mongo() {
     </>
   );
 }
-
 
 export default Mongo;

@@ -30,12 +30,14 @@ function Publicacion(props) {
     upvotes: props.upvotes,
     downvotes: props.downvotes,
   };
-  if (publicacion.fecha !== null) {
+  if (publicacion.fecha === null || publicacion.fecha === undefined) {
     publicacion.fecha = new Date();
-  } else if (publicacion.fecha.toString() === "0000-00-00") {
-    publicacion.fecha = new Date(publicacion.fecha);
   } else {
-    publicacion.fecha = new Date();
+    if (publicacion.fecha === "0000-00-00") {
+      publicacion.fecha = new Date();
+    } else {
+      publicacion.fecha = new Date(publicacion.fecha);
+    }
   }
   return (
     <Container>

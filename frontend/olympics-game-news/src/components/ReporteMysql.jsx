@@ -11,7 +11,7 @@ import Barra from "./Barra";
 
 let socket;
 
-const ReporteMongo = () => {
+const ReporteMysql = () => {
   const [ultimos, setUltimos] = useState([]);
   const [noticias, setNoticias] = useState(0);
   const [hashtags, setHastags] = useState(0);
@@ -27,39 +27,48 @@ const ReporteMongo = () => {
       setTimeout(() => {
         socket = io(url);
         axios({
-          url: url + "/mongo/reportes",
+          url: url + "/mysql/consulta1",
           method: "get",
         })
           .then((response) => {
             let data = response.data.data;
             if (data.lenght !== 0) {
-              socket.emit("mongo", data[0].noticias, setNoticias);
-              socket.emit("mongo", data[1].upvotes, setUpvotes);
-              socket.emit("mongo", data[2].hashtags, setHastags);
-              let labels = [];
-              let datos = [];
-              data[3].top.forEach((element) => {
-                labels.push(element.nombre);
-                datos.push(element.total);
-              });
-              socket.emit("mongo", labels, setLabels);
-              socket.emit("mongo", datos, setDataTop);
+              socket.emit("mysql", data[0].noticias, setNoticias);
+              socket.emit("mysql", data[0].hashtags, setHastags);
+              socket.emit("mysql", data[0].upvotes, setUpvotes);
             }
           })
           .catch((err) => console.log(err));
 
         axios({
-          url: url + "/mongo/ultimos",
+          url: url + "/mysql/consulta2",
           method: "get",
         })
           .then((response) => {
             let data = response.data.data;
-            socket.emit("mongo", data, setUltimos);
+            let labels = [];
+            let datos = [];
+            data.forEach((element) => {
+              labels.push(element.tag);
+              datos.push(element.total);
+            });
+            socket.emit("mysql", labels, setLabels);
+            socket.emit("mysql", datos, setDataTop);
           })
           .catch((err) => console.log(err));
 
         axios({
-          url: url + "/mongo/votos",
+          url: url + "/mysql/ultimos",
+          method: "get",
+        })
+          .then((response) => {
+            let data = response.data.data;
+            socket.emit("mysql", data, setUltimos);
+          })
+          .catch((err) => console.log(err));
+
+        axios({
+          url: url + "/mysql/votos",
           method: "get",
         })
           .then((response) => {
@@ -67,14 +76,14 @@ const ReporteMongo = () => {
             let labelTemp = [];
             let upvotesTemp = [];
             let downvotesTemp = [];
-            data[0].data.forEach((e) => {
+            data.forEach((e) => {
               labelTemp.push(e.fecha);
               upvotesTemp.push(e.upvotes);
               downvotesTemp.push(e.downvotes);
             });
-            socket.emit("mongo", labelTemp, setLabelFecha);
-            socket.emit("mongo", upvotesTemp, setConteoUpvotes);
-            socket.emit("mongo", downvotesTemp, setConteoDownvotes);
+            socket.emit("mysql", labelTemp, setLabelFecha);
+            socket.emit("mysql", upvotesTemp, setConteoUpvotes);
+            socket.emit("mysql", downvotesTemp, setConteoDownvotes);
           })
           .catch((err) => console.log(err));
       }, 1000);
@@ -265,4 +274,4 @@ const ReporteMongo = () => {
   );
 };
 
-export default ReporteMongo;
+export default ReporteMysql;
