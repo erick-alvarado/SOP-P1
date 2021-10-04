@@ -20,9 +20,9 @@ func main() {
 	} else {
 		clienteHttp := &http.Client{}
 		//URL del load balancer
-		url := "http://localhost:4000/go/publicar"
+		url := "http://34.120.185.238:80/go/publicar"
 
-		for i := 0; i < 10; i++ {
+		for i := 0; i < len(data); i++ {
 			publicacion, err := json.Marshal(data[i])
 			if err != nil {
 				// Maneja el error de acuerdo a tu situación
