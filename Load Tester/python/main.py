@@ -1,6 +1,5 @@
 import json
 import requests
-import time
 
 print("Leer archivos")
 leer = json.loads(open('data.json').read())
