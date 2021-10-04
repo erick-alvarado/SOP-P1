@@ -37,7 +37,7 @@ mydb2 = mydb_mongo['publicaciones']
 
 
 # Start load
-@app.route('/python/iniciarCarga')
+@app.route('/iniciarCarga')
 def iniciarCarga():
     global mycursor, timeSQL,timeMONGO, counterSQL , counterMONGO
     counterSQL = 0
@@ -49,11 +49,8 @@ def iniciarCarga():
     return jsonify({'response': 'Python db connected!'})
 
 
-
-
-
 # Publish 
-@app.route('/python/publicar', methods=['POST'])
+@app.route('/publicar', methods=['POST'])
 def publicar():
     global counterSQL , counterMONGO, timeSQL,timeMONGO
     json_data = request.json
@@ -95,7 +92,7 @@ def publicar():
 
 
 # End Load
-@app.route('/python/finalizarCarga')
+@app.route('/finalizarCarga')
 def finalizarCarga():
     global counterSQL , counterMONGO, timeSQL,timeMONGO
     # TODO(developer)
@@ -107,13 +104,13 @@ def finalizarCarga():
             "guardados":counterSQL,
             "api": "Python",
             "tiempoDeCarga":timeSQL,
-            "bd": "CosmoDB"
+            "bd": "MySQL"
         })
     sql_json = json.dumps({
             "guardados": counterMONGO,
             "api": "Python",
             "tiempoDeCarga":timeMONGO,
-            "bd": "MySQL"
+            "bd": "CosmoDB"
         })
     try:
         publisher = pubsub_v1.PublisherClient()
