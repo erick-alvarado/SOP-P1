@@ -8,7 +8,7 @@ CORS(app)
 @app.route('/ram', methods=['GET'])
 def getRam():
     dfile = open("/proc/modram", 'r')
-    datos = file.read()
+    datos = dfile.read()
     datos = json.loads(datos)
     print(datos)
     return datos

@@ -1,10 +1,9 @@
 import json
 import requests
+import time
 
 print("Leer archivos")
 leer = json.loads(open('data.json').read())
-respuesta_finalizar_rust = requests.get('')
 for publicacion in leer:
-    respuesta_publicar_rust = requests.post('', json=publicacion)
-
-respuesta_finalizar_rust = requests.get('')
+    respuesta_publicar_rust = requests.post('http://34.120.185.238/rust/publicar', json=publicacion)
+    print(respuesta_publicar_rust.ok)

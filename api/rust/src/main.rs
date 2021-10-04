@@ -68,7 +68,7 @@ async fn ps(){
       "Bienvenido API Rust"
   }
 
-  #[get("/rust/iniciarCarga")]
+  #[get("/iniciarCarga")]
    fn iniciar_carga() -> &'static str {
 
     let mut pm : PubSub = PubSub{
@@ -90,7 +90,7 @@ async fn ps(){
     "Carga Iniciada"
   }
 
-  #[get("/rust/finalizarCarga")]
+  #[get("/finalizarCarga")]
    fn finalizar_carga() -> &'static str {
     
       let future = ps(); // Nothing is printed
@@ -115,7 +115,7 @@ async fn ps(){
     "Carga Finalizada"
   }
 
-  #[post("/rust/publicar", format="json", data = "<json>")]
+  #[post("/publicar", format="json", data = "<json>")]
    fn publicar(json: Json<Publicacion>)  {
     let sys_time = SystemTime::now();
     let mysql_host = env::var("HOST_MYSQL").unwrap();
