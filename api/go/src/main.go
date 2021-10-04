@@ -175,11 +175,11 @@ func main() {
 	//Ruta principal
 	router.HandleFunc("/", indexRoute)
 	//Ruta para conectarse a la base de datos y esperar los datos
-	router.HandleFunc("/go/iniciarCarga", iniciarCarga).Methods("GET")
+	router.HandleFunc("/iniciarCarga", iniciarCarga).Methods("GET")
 	//Ruta para publicar la informacion de la base de datos
-	router.HandleFunc("/go/publicar", publicar).Methods("POST")
+	router.HandleFunc("/publicar", publicar).Methods("POST")
 	//Ruta para cerrar la conexion de la base de datos y mandar una notificacion
-	router.HandleFunc("/go/finalizarCarga", finalizarCarga).Methods("GET")
+	router.HandleFunc("/finalizarCarga", finalizarCarga).Methods("GET")
 	//Escuchamos al puerto
 	fmt.Println("Server on port:" + port)
 	log.Fatal(http.ListenAndServe(":"+port, router))
