@@ -1,4 +1,5 @@
 import json
+from random import randint
 from locust import HttpUser, task, between
 
 #locust --locustfile traffic.py
@@ -19,7 +20,17 @@ class MessageTraffic(HttpUser):
     def PostMessage(self):
         wait_time = between(0.1, 0.9)
         if len(self.data) != 0 :
-            res = self.client.post("/python/publicar", json=self.data[0])
+            value = randint(0, 3)
+            
+            if(value ==0):
+                res = self.client.post("/publicar", json=self.data[0])
+            elif value ==1:
+                res = self.client.post("/go/publicar", json=self.data[0])
+            elif value ==2:
+                res = self.client.post("/python/publicar", json=self.data[0])
+            else:
+                res = self.client.post("/function/python/publicar", json=self.data[0])
+
             print(res)
             self.data.pop(0)
         else:
